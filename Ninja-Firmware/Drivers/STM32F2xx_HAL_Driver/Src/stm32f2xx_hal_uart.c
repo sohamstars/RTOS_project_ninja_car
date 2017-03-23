@@ -933,9 +933,11 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *pDat
   * @note   When the UART parity is enabled (PCE = 1) the data received contain the parity bit.
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
+HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint8_t *p2Data, uint16_t Size)
+//HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
 {
   uint32_t *tmp;
+	uint32_t *tmp1;
 
   /* Check that a Rx process is not already ongoing */
   if(huart->RxState == HAL_UART_STATE_READY)
@@ -958,8 +960,9 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData
     huart->hdmarx->XferCpltCallback = UART_DMAReceiveCplt;
     
     /* Set the UART DMA Half transfer complete callback */
-    huart->hdmarx->XferHalfCpltCallback = UART_DMARxHalfCplt;
-    
+    huart->hdmarx->XferM1CpltCallback = UART_DMARxHalfCplt;
+    huart->hdmarx->XferHalfCpltCallback = NULL;
+		huart->hdmarx->XferM1HalfCpltCallback = NULL;
     /* Set the DMA error callback */
     huart->hdmarx->XferErrorCallback = UART_DMAError;
     
@@ -968,8 +971,9 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *pData
 
     /* Enable the DMA Stream */
     tmp = (uint32_t*)&pData;
-    HAL_DMA_Start_IT(huart->hdmarx, (uint32_t)&huart->Instance->DR, *(uint32_t*)tmp, Size);
-
+		tmp1 = (uint32_t*)&p2Data;
+ //   HAL_DMA_Start_IT(huart->hdmarx, (uint32_t)&huart->Instance->DR, *(uint32_t*)tmp, Size);
+		HAL_DMAEx_MultiBufferStart_IT(huart->hdmarx, (uint32_t)&huart->Instance->DR, *(uint32_t*)tmp, *(uint32_t*)tmp1, Size);
     /* Enable the UART Parity Error Interrupt */
     SET_BIT(huart->Instance->CR1, USART_CR1_PEIE);
 

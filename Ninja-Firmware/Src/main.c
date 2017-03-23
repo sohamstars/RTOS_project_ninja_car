@@ -38,18 +38,19 @@
 #include "usart.h"
 #include "gpio.h"
 
-/* USER CODE BEGIN Includes */
+uint8_t flag = 0;
 
-/* USER CODE END Includes */
+uint8_t data_1[5];
+uint8_t data_2[5];
 
-/* Private variables ---------------------------------------------------------*/
+uint8_t enable_print = 0;
+unsigned char a2 = '\n';
+char *str1 = "Memory buffer 1 filled";
+char *str2 = "Memory buffer 2 filled";
+unsigned char a1 = 'a';
+extern DMA_HandleTypeDef hdma_usart3_rx;
 
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
 
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void Error_Handler(void);
 
@@ -81,26 +82,44 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
-  MX_TIM4_Init();
-  MX_TIM5_Init();
+  //MX_TIM1_Init();
+  //MX_TIM2_Init();
+  //MX_TIM3_Init();
+  //MX_TIM4_Init();
+  //MX_TIM5_Init();
   MX_USART3_UART_Init();
-  MX_TIM8_Init();
-  MX_TIM9_Init();
+  //MX_TIM8_Init();
+  //MX_TIM9_Init();
 
-  /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_DMA(&huart3, (uint8_t *)data_1,(uint8_t *)data_2, 5);
 
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
+	//	HAL_UART_Transmit(&huart3, (unsigned char *)&a1 , 1, 1000);
+		if(enable_print == 1 && flag == 1)
+		{
+				HAL_UART_Transmit(&huart3, data_1 , 5, 1000);	
+				a2 = ' ';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				HAL_UART_Transmit(&huart3, (char *)str1 , 22, 1000);
+				a2 = '\r';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				a2 = '\n';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				enable_print = 0;
+		}
+		else if(enable_print == 1 && flag == 0)
+		{
+				HAL_UART_Transmit(&huart3, data_2 , 5, 1000);	
+				a2 = ' ';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				HAL_UART_Transmit(&huart3, (char *)str2 , 22, 1000);
+				a2 = '\r';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				a2 = '\n';
+				HAL_UART_Transmit(&huart3, (unsigned char *)&a2 , 1, 1000);
+				enable_print = 0;
+		}
 
   }
   /* USER CODE END 3 */
